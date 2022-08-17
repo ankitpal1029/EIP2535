@@ -18,9 +18,9 @@ contract Diamond {
         address superAdmin;
     }
 
-    constructor(address _superAdmin) {
+    constructor() {
         DiamondStorage storage ds = diamondStorage();
-        ds.superAdmin = _superAdmin;
+        ds.superAdmin = msg.sender;
     }
 
     function diamondStorage()
@@ -37,7 +37,7 @@ contract Diamond {
     function addFunctions(
         address _facetAddress,
         bytes4[] memory _functionSelectors
-    ) external superAdminOnly {
+    ) external adminOnly {
         require(_functionSelectors.length > 0, "No Selectors in facet");
         DiamondStorage storage ds = diamondStorage();
         uint16 selectorCount = uint16(ds.selectors.length);
@@ -69,7 +69,7 @@ contract Diamond {
 
     function removeFunctions(bytes4[] memory _functionSelectors)
         external
-        superAdminOnly
+        adminOnly
     {
         require(_functionSelectors.length > 0, "No selectors");
         DiamondStorage storage ds = diamondStorage();
@@ -111,7 +111,7 @@ contract Diamond {
     function replaceFunctions(
         address _facetAddress,
         bytes4[] memory _functionSelectors
-    ) external superAdminOnly {
+    ) external adminOnly {
         require(_functionSelectors.length > 0, "No selectors");
         DiamondStorage storage ds = diamondStorage();
         require(
@@ -150,9 +150,9 @@ contract Diamond {
         require(contractSize > 0, _errorMessage);
     }
 
-    modifier superAdminOnly() {
+    modifier adminOnly() {
         DiamondStorage storage ds = diamondStorage();
-        require(msg.sender == ds.superAdmin, "Not Authorised to cut diamond");
+        require(ds.admins[msg.sender] == true, "Not Authorised to cut diamond");
         _;
     }
 }
