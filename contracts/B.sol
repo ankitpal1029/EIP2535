@@ -4,33 +4,34 @@ pragma solidity ^0.8.9;
 import {Diamond} from "./Diamond.sol";
 
 contract B is Diamond {
-    function addAdmin(address _addAdmin) public superAdminOnly {
+    // add admin role for A
+    function addAdmin(address _addAdmin) public adminBOnly {
         DiamondStorage storage ds = diamondStorage();
-        ds.admins[_addAdmin] = true;
+        ds.AdminA = _addAdmin;
     }
 
-    function removeAdmin(address _removeAddress) public superAdminOnly {
+    // remove admin role for A
+    function removeAdmin() public adminBOnly {
         DiamondStorage storage ds = diamondStorage();
-        delete ds.admins[_removeAddress];
+        delete ds.AdminA;
     }
 
-    function transferAdminRole(address _transferToAddress)
-        public
-        superAdminOnly
-    {
+    // transfer admin role for A
+    function transferAdminRole(address _transferToAddress) public adminBOnly {
         DiamondStorage storage ds = diamondStorage();
-        delete ds.admins[msg.sender];
-        ds.admins[_transferToAddress] = true;
+        delete ds.AdminA;
+        ds.AdminA = _transferToAddress;
     }
 
-    function renounceAdminRole() public superAdminOnly {
+    // renouncing admin role of B
+    function renounceAdminRole() public adminBOnly {
         DiamondStorage storage ds = diamondStorage();
-        delete ds.admins[msg.sender];
+        delete ds.AdminB;
     }
 
-    modifier superAdminOnly() {
+    modifier adminBOnly() {
         DiamondStorage storage ds = diamondStorage();
-        require(ds.superAdmin == msg.sender, "Not Authorized: Not super admin");
+        require(ds.AdminB == msg.sender, "Not Authorized: Not admin B");
         _;
     }
 }

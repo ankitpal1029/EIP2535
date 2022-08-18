@@ -12,15 +12,17 @@ contract Diamond {
 
     struct DiamondStorage {
         uint256 counter;
-        mapping(address => bool) admins;
         mapping(bytes4 => FacetAddressAndSelectorPosition) facetAddressAndSelectorPosition;
         bytes4[] selectors;
-        address superAdmin;
+        // admin A, admin B, Diamond admin
+        address DiamondAdmin;
+        address AdminA;
+        address AdminB;
     }
 
     constructor() {
         DiamondStorage storage ds = diamondStorage();
-        ds.superAdmin = msg.sender;
+        ds.DiamondAdmin = msg.sender;
     }
 
     function diamondStorage()
@@ -37,7 +39,7 @@ contract Diamond {
     function addFunctions(
         address _facetAddress,
         bytes4[] memory _functionSelectors
-    ) external adminOnly {
+    ) external diamondAdminOnly {
         require(_functionSelectors.length > 0, "No Selectors in facet");
         DiamondStorage storage ds = diamondStorage();
         uint16 selectorCount = uint16(ds.selectors.length);
@@ -69,7 +71,7 @@ contract Diamond {
 
     function removeFunctions(bytes4[] memory _functionSelectors)
         external
-        adminOnly
+        diamondAdminOnly
     {
         require(_functionSelectors.length > 0, "No selectors");
         DiamondStorage storage ds = diamondStorage();
@@ -111,7 +113,7 @@ contract Diamond {
     function replaceFunctions(
         address _facetAddress,
         bytes4[] memory _functionSelectors
-    ) external adminOnly {
+    ) external diamondAdminOnly {
         require(_functionSelectors.length > 0, "No selectors");
         DiamondStorage storage ds = diamondStorage();
         require(
@@ -150,9 +152,9 @@ contract Diamond {
         require(contractSize > 0, _errorMessage);
     }
 
-    modifier adminOnly() {
+    modifier diamondAdminOnly() {
         DiamondStorage storage ds = diamondStorage();
-        require(ds.admins[msg.sender] == true, "Not Authorised to cut diamond");
+        require(ds.DiamondAdmin == msg.sender, "Not authorized to cut diamond");
         _;
     }
 }
