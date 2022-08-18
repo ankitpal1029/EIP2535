@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.9;
+import "hardhat/console.sol";
 
 contract Diamond {
     bytes32 constant DIAMOND_STORAGE_POSITION =
@@ -23,6 +24,8 @@ contract Diamond {
     constructor() {
         DiamondStorage storage ds = diamondStorage();
         ds.DiamondAdmin = msg.sender;
+        ds.AdminB = msg.sender;
+        ds.AdminA = msg.sender;
     }
 
     function diamondStorage()
@@ -130,6 +133,7 @@ contract Diamond {
             address oldFacetAddress = ds
                 .facetAddressAndSelectorPosition[selector]
                 .facetAddress;
+            // console.log("old address: %s", oldFacetAddress);
             require(
                 oldFacetAddress != address(0),
                 "Cannot replace function that doesn't exist"
@@ -138,6 +142,8 @@ contract Diamond {
             ds
                 .facetAddressAndSelectorPosition[selector]
                 .facetAddress = _facetAddress;
+
+            // console.log("functionSelector: %s", string(_functionSelectors[selectorIndex]));
         }
     }
 
@@ -157,4 +163,31 @@ contract Diamond {
         require(ds.DiamondAdmin == msg.sender, "Not authorized to cut diamond");
         _;
     }
+
+    fallback() external payable {
+        DiamondStorage storage ds;
+        bytes32 position = DIAMOND_STORAGE_POSITION;
+        assembly {
+            ds.slot := position
+        }
+        address facet = ds
+            .facetAddressAndSelectorPosition[msg.sig]
+            .facetAddress;
+        require(facet != address(0), "Diamond: Function Does not exist");
+
+        assembly {
+            calldatacopy(0, 0, calldatasize())
+            let result := delegatecall(gas(), facet, 0, calldatasize(), 0, 0)
+            returndatacopy(0, 0, returndatasize())
+            switch result
+            case 0 {
+                revert(0, returndatasize())
+            }
+            default {
+                return(0, returndatasize())
+            }
+        }
+    }
+
+    receive() external payable {}
 }

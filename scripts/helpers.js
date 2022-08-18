@@ -7,12 +7,12 @@ const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
 
 // get function selectors from ABI
 
-function getDiamondSelectors(contract) {
-  const map = new Map();
+function getInheritedSelectors(contract, map) {
+  // const map = new Map();
   const signatures = Object.keys(contract.interface.functions);
   const selectors = signatures.reduce((acc, val) => {
     if (val !== "init(bytes)") {
-      console.log(`${contract.interface.getSighash(val)}: ${val}`);
+      // console.log(`${contract.interface.getSighash(val)}: ${val}`);
       map.set(contract.interface.getSighash(val), true);
       acc.push(contract.interface.getSighash(val));
     }
@@ -32,6 +32,7 @@ function getSelectors(contract, diamondMap) {
     }
     return acc;
   }, []);
+  console.log("******************");
   selectors.contract = contract;
   selectors.remove = remove;
   selectors.get = get;
@@ -104,7 +105,7 @@ export {
   remove,
   removeSelectors,
   findAddressPositionInFacets,
-  getDiamondSelectors,
+  getInheritedSelectors,
 };
 
 // exports.getSelectors = getSelectors;

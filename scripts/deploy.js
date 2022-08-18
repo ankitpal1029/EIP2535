@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { getSelectors, FacetCutAction, getDiamondSelectors } from "./helpers";
+import { getSelectors, FacetCutAction, getInheritedSelectors } from "./helpers";
 
 async function deployDiamond() {
   const accounts = await ethers.getSigners();
@@ -16,7 +16,7 @@ async function deployDiamond() {
   const FacetNames = ["A", "B"];
 
   let diamondMap = new Map();
-  diamondMap = getDiamondSelectors(diamond);
+  diamondMap = getInheritedSelectors(diamond, diamondMap);
   for (const facetName of FacetNames) {
     const Facet = await ethers.getContractFactory(facetName);
     const facet = await Facet.deploy();

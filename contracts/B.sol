@@ -29,6 +29,11 @@ contract B is Diamond {
         delete ds.AdminB;
     }
 
+    function returnAdminA() public view returns (address adminA) {
+        DiamondStorage storage ds = diamondStorage();
+        adminA = ds.AdminA;
+    }
+
     modifier adminBOnly() {
         DiamondStorage storage ds = diamondStorage();
         require(ds.AdminB == msg.sender, "Not Authorized: Not admin B");
