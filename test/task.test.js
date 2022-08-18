@@ -6,7 +6,7 @@ import {
 
 import { deployDiamond } from "../scripts/deploy";
 
-import { assert } from "chai";
+import { assert, expect } from "chai";
 import { ethers } from "hardhat";
 
 describe("Diamond Test", async () => {
@@ -73,5 +73,36 @@ describe("Diamond Test", async () => {
     );
     val = await CallFacetAUpgraded.getter();
     assert.equal(val.toString(), "10");
+  });
+
+  it("Should change admin address via Contract B", async () => {
+    // check if accounts[0] is default admin
+    let val = await FacetB.returnAdminA();
+    assert.equal(val, accounts[0].address);
+
+    // change admin to accounts[3]
+    await FacetB.addAdmin(accounts[3].address);
+    val = await FacetB.returnAdminA();
+    assert.equal(val, accounts[3].address);
+
+    await expect(CallFacetAUpgraded.getter()).to.be.revertedWith(
+      "Not Authorized: Not admin A"
+    );
+    // val = await CallFacetAUpgraded.getter();
+    // console.log(val);
+  });
+
+  it("Should call setter getter few more times", async () => {
+    const CallFacetAUpgradedNewAdmin = await ethers.getContractAt(
+      "AUpgraded",
+      diamondAddress,
+      accounts[3]
+    );
+    let val = await CallFacetAUpgradedNewAdmin.getter();
+    assert.equal(val.toString(), "10");
+
+    await CallFacetAUpgradedNewAdmin.setter(81);
+    val = await CallFacetAUpgradedNewAdmin.getter();
+    assert.equal(val.toString(), "91");
   });
 });
