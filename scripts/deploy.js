@@ -53,4 +53,4 @@ if (require.main === module) {
 }
 
 // exports.deployDiamond = deployDiamond;
-// export { deployDiamond };
+export { deployDiamond };

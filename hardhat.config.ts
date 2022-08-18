@@ -6,7 +6,7 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const { PRIVATE_KEY, BSC_URL } = process.env;
+const { PRIVATE_KEY, BSC_URL, PRIVATE_KEY_2 } = process.env;
 
 const config: HardhatUserConfig = {
   solidity: "0.8.9",
@@ -17,7 +17,10 @@ const config: HardhatUserConfig = {
     bsctestnet: {
       url: BSC_URL ? BSC_URL : "",
       chainId: 97,
-      accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
+      accounts:
+        PRIVATE_KEY && PRIVATE_KEY_2 !== undefined
+          ? [PRIVATE_KEY, PRIVATE_KEY_2]
+          : [],
     },
   },
   namedAccounts: {
